@@ -17,4 +17,6 @@ Route::middleware(['auth:sanctum'])->group(function() {
         Route::get("tokens", [UserController::class, 'tokens']);
         Route::delete("revoke-all-tokens", [UserController::class, 'revokeAllTokens']);
     });
+
+    
 });
