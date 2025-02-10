@@ -14,6 +14,13 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        if ($request->role && $request->role == 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Page not found'
+            ], 404);
+        }
+
         $fields = $request->validate([
             'name' => 'required|string',
             'email' => 'required|string|unique:users,email',
@@ -27,6 +34,13 @@ class AuthController extends Controller
             'phone' => $fields['phone'] ?? null,
             'password' => bcrypt($fields['password'])
         ]);
+
+        if ($request->role) {
+            $role = Role::find(RoleCode::{$request->role});
+            if ($role) {
+                $user->roles()->attach($role->id);
+            }
+        }
 
         $token = $user->createToken(Device::tokenName())->plainTextToken;
 
