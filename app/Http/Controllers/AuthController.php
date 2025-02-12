@@ -2,16 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Role;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use App\Helpers\Device;
+use App\Enum\RoleCode;
 
 class AuthController extends Controller
 {
 
     public function register(Request $request)
     {
+        if ($request->role && $request->role == 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Page not found'
+            ], 404);
+        }
+
         $fields = $request->validate([
             'name' => 'required|string',
             'email' => 'required|string|unique:users,email',
@@ -22,9 +31,16 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $fields['name'],
             'email' => $fields['email'],
-            'phone' => $fields['phone'],
+            'phone' => $fields['phone'] ?? null,
             'password' => bcrypt($fields['password'])
         ]);
+
+        if ($request->role) {
+            $role = Role::find(RoleCode::{$request->role});
+            if ($role) {
+                $user->roles()->attach($role->id);
+            }
+        }
 
         $token = $user->createToken(Device::tokenName())->plainTextToken;
 
@@ -65,11 +81,21 @@ class AuthController extends Controller
             ], 401);
         }
 
+        if ($request->role) {
+            $role = $user->roles()->where('role_id', RoleCode::{$request->role})->first();
+            if (!$role) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'
+                ], 401);
+            }
+        }
+
         $token = $user->createToken(Device::tokenName())->plainTextToken;
 
         $response = [
             'success' => true,
-            'message' => 'User created',
+            'message' => 'User logged in',
             'data' => [
                 'user' => $user,
                 'token' => $token
