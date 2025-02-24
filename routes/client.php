@@ -15,7 +15,13 @@ Route::get('/', function () {
 Route::prefix('auth')->group(base_path('routes/auth.php'));
 
 Route::get("categories", [CategoryController::class, 'index']);
-Route::get("stores", [StoreController::class, 'index']);
+
+Route::prefix("stores")
+    ->controller(StoreController::class)
+    ->group(function() {
+        Route::get("", 'index');
+        Route::get("{id}", 'show');
+    });
 
 Route::middleware(['auth:sanctum'])->group(function() {
     Route::prefix("users")
