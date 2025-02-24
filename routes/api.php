@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return response()->json([
-        'message' => 'Welcome to e-food API !'
+        'message' => 'Welcome to e-food API !!!'
     ]);
 });
 
