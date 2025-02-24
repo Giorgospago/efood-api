@@ -1,10 +1,23 @@
 <?php
 
+use App\Mail\TestMail;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return response()->json([
         'message' => 'Welcome to e-food API !!!'
+    ]);
+});
+
+Route::get('/test-email', function () {
+
+    for ($i = 0; $i < 100; $i++) {
+        Mail::to('info' . $i . '@pagonoudis.gr')
+        ->send(new TestMail());
+    }
+
+    return response()->json([
+        'message' => 'Email sent successfully'
     ]);
 });
 
