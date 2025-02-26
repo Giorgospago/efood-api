@@ -10,14 +10,6 @@ class EditStore extends EditRecord
 {
     protected static string $resource = StoreResource::class;
 
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        $data["latitude"] = $data["location"]["lat"];
-        $data["longitude"] = $data["location"]["lng"];
-
-        return $data;
-    }
-
     protected function getHeaderActions(): array
     {
         return [
