@@ -18,6 +18,9 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Outerweb\FilamentTranslatableFields\Filament\Plugins\FilamentTranslatableFieldsPlugin;
+use Filament\Actions\Action as GenericAction;
+use Filament\Actions\StaticAction;
+use Filament\Tables\Actions\Action as TableAction;
 
 class MerchantPanelProvider extends PanelProvider
 {
@@ -26,7 +29,8 @@ class MerchantPanelProvider extends PanelProvider
         return $panel
             ->id('merchant')
             ->path('merchant')
-            ->profile()
+            ->profile(isSimple: false)
+            ->emailVerification()
             ->login()
             ->registration()
             ->passwordReset()
@@ -60,6 +64,44 @@ class MerchantPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->bootUsing(function (Panel $panel) {
+                app()->setLocale("en");
+
+                GenericAction::configureUsing(function (GenericAction $action) {
+                    $this->configureAction($action->getName(), $action);
+                });
+                TableAction::configureUsing(function (TableAction $action) {
+                    $this->configureAction($action->getName(), $action);
+                });
+                StaticAction::configureUsing(function (StaticAction $action) {
+                    $this->configureAction($action->getName(), $action);
+                });
+            });
+    }
+
+    private function configureAction(string $name, StaticAction $action): void {
+        switch ($name) {
+            case 'create':
+            case 'submit':
+                $action
+                    ->color(Color::Green)
+                    ->icon('heroicon-s-plus');
+                break;
+            case 'save':
+                $action
+                    ->color(Color::Blue)
+                    ->icon('heroicon-s-check');
+                break;
+            case 'edit':
+                $action
+                    ->color(Color::Blue)
+                    ->icon('heroicon-s-pencil');
+                break;
+            case 'delete':
+                $action
+                    ->icon('heroicon-o-trash');
+                break;
+        }
     }
 }
