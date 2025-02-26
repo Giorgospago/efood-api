@@ -14,8 +14,6 @@ class UserRoleSeeder extends Seeder
      */
     public function run(): void
     {
-        app()->setLocale('el');
-
         $this->command->info("Searching for user with email 'george@pagonoudis.gr'...");
         $user = User::whereEmail('george@pagonoudis.gr')->first();
         if ($user) {

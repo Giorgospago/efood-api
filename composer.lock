@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c121028f1bf3a6b89e129df70c82d6c3",
+    "content-hash": "c04f1d204b17d233b40de4bdbee56c9e",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -71,6 +71,72 @@
                 "source": "https://github.com/AnourValar/eloquent-serialize/tree/1.2.28"
             },
             "time": "2025-01-27T15:13:13+00:00"
+        },
+        {
+            "name": "arbermustafa/filament-locationpickr-field",
+            "version": "2.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/arbermustafa/filament-locationpickr-field.git",
+                "reference": "4cec47af76384fa2f4642002a0765dc9285f6ce6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/arbermustafa/filament-locationpickr-field/zipball/4cec47af76384fa2f4642002a0765dc9285f6ce6",
+                "reference": "4cec47af76384fa2f4642002a0765dc9285f6ce6",
+                "shasum": ""
+            },
+            "require": {
+                "filament/forms": "^3.0",
+                "php": "^8.1",
+                "spatie/laravel-package-tools": "^1.13.5"
+            },
+            "require-dev": {
+                "pestphp/pest": "^2.10"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "ArberMustafa\\FilamentLocationPickrField\\LocationPickrFieldServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ArberMustafa\\FilamentLocationPickrField\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Arber Mustafa",
+                    "email": "info@arbermustafa.com",
+                    "homepage": "https://arbermustafa.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Location picker field for Filament Php using Google Maps",
+            "homepage": "https://github.com/arbermustafa/filament-locationpickr-field",
+            "keywords": [
+                "arbermustafa",
+                "field",
+                "filament-locationpickr-field",
+                "filament-plugin",
+                "form",
+                "google-maps",
+                "laravel",
+                "maps",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/arbermustafa/filament-locationpickr-field/issues",
+                "source": "https://github.com/arbermustafa/filament-locationpickr-field/tree/2.0.4"
+            },
+            "time": "2023-12-29T08:14:10+00:00"
         },
         {
             "name": "blade-ui-kit/blade-heroicons",

@@ -60,6 +60,8 @@ class User extends Authenticatable implements FilamentUser
         if ($panel_id === "admin") {
             $role = $this->roles()->where('role_id', RoleCode::admin)->first();
             return !is_null($role);
+        } else if ($panel_id === "merchant") {
+            return true;
         }
 
         return false;
