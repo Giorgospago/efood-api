@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AddressController;
 use App\Http\Controllers\StoreController;
+use App\Http\Controllers\OrderController;
 
 Route::get('/', function () {
     return response()->json([
@@ -39,6 +40,14 @@ Route::middleware(['auth:sanctum'])->group(function() {
             Route::post("", 'store');
             Route::get("{id}", 'show');
             Route::delete("{id}", 'destroy');
+        });
+
+    Route::prefix("orders")
+        ->controller(OrderController::class)
+        ->group(function() {
+            Route::get("", 'index');
+            Route::post("", 'store');
+            Route::get("{id}", 'show');
         });
     
 });

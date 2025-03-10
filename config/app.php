@@ -128,4 +128,25 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | 
+    |--------------------------------------------------------------------------
+    */
+    'delivery_time' => [
+        'minutes_per_km' => 2,
+        'minutes_per_item' => 3,
+        'minutes_per_store_order' => 4,
+        'minutes_per_driver_order' => 5
+    ],
+
+    'shipping_price' => [
+        'fixed' => 2,
+        'price_per_km' => 0.5,
+    ],
+
+    'driver_commission' => [
+        'percentage' => 0.5,
+    ],
+
 ];
