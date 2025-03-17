@@ -8,6 +8,8 @@ use App\Models\Coupon;
 use App\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Sebdesign\VivaPayments\Enums\TransactionStatus;
+use Sebdesign\VivaPayments\Facades\Viva;
 
 class OrderController extends Controller
 {
@@ -57,7 +59,7 @@ class OrderController extends Controller
             return response()->json($response, 404);
         }
 
-        $distanceInKm = DB::select("SELECT distance({$store->latitude},{$store->longitude},{$address->latitude},{$address->longitude}) as distance")[0]->distance;
+        $distanceInKm = DB::selectOne("SELECT distance({$store->latitude},{$store->longitude},{$address->latitude},{$address->longitude}) as distance")->distance;
         if ($store->delivery_range < $distanceInKm) {
             $response = [
                 'success' => false,
@@ -113,25 +115,19 @@ class OrderController extends Controller
         
         $storeOrdersCount = $store->orders()
             ->whereIn('status', ['pending', 'processing', 'out_for_delivery'])
+            // ->whereId('!=', $order->id)
             ->count();
         $orderProductsCount = $order->products()->count();
         $shippingPriceFixed = config('app.shipping_price.fixed');
         $shippingPricePerKm = config('app.shipping_price.price_per_km');
         
-        $order->delivery_time = ($minPerStoreOrder * $storeOrdersCount) + ($minPerItem * $orderProductsCount) + ($minPerKm * $distanceInKm);
-        $order->shipping_price = $shippingPriceFixed + ($shippingPricePerKm * $distanceInKm);
-
-        
-        /**
-         * Check Payment Method
-         */
-        if ($order->payment_method === 'card') {
-            // payment_id
-        }
+        $order->delivery_time = abs(($minPerStoreOrder * $storeOrdersCount) + ($minPerItem * $orderProductsCount) + ($minPerKm * $distanceInKm));
+        $order->shipping_price = round($shippingPriceFixed + ($shippingPricePerKm * $distanceInKm), 2);
 
         /**
          * Check Coupon discount
          */
+        $order->discount = 0;
         if ($request->has('coupon_code')) {
             $couponIsValid = true;
             $coupon = Coupon::where('code', $request->coupon_code)
@@ -164,11 +160,21 @@ class OrderController extends Controller
         $order->total_price = $order->products_price + $order->shipping_price - $order->discount + $order->tip;
         $order->save();
 
+        /**
+         * Check Payment Method
+         */
+        $vivaRedirectUrl = null;
+        if ($order->payment_method === 'card') {
+            $order->createVivaCode();
+            $vivaRedirectUrl = $order->getVivaUrl();
+        }
+
         $response = [
             'success' => true,
             'message' => 'Order created',
             'data' => [
-                'order' => $order->refresh()
+                'order' => $order->refresh(),
+                'viva_redirect_url' => $vivaRedirectUrl
             ]
         ];
         return response()->json($response, 201);
@@ -198,6 +204,41 @@ class OrderController extends Controller
             ]
         ];
         return response()->json($response);
+    }
+
+    /**
+     * Viva Return
+     */
+    public function vivaReturn(Request $request)
+    {
+        try {
+            $transaction = Viva::transactions()->retrieve($request->input('t'));
+        } catch (VivaException $e) {
+            //
+        }
+
+        $order_id =  str_replace("order:", "", $transaction->merchantTrns);
+        $order = Order::find($order_id);
+        if (!$order) {
+            $response = [
+                'success' => false,
+                'message' => 'Order not found'
+            ];
+            return response()->json($response, 404);
+        }
+
+        if ($transaction->statusId === TransactionStatus::PaymentSuccessful) {
+            $order->payment_status = 'completed';
+            $order->status = 'processing';
+            // notify store
+        }
+        else if ($transaction->statusId === TransactionStatus::Error) {
+            $order->payment_status = 'failed';
+            $order->status = 'cancelled';
+        }
+        $order->save();
+
+        return redirect()->to(env("CLIENT_URL") . "/orders/{$order->id}");
     }
 
 }

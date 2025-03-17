@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Sebdesign\VivaPayments\Facades\Viva;
+use Sebdesign\VivaPayments\Requests\CreatePaymentOrder;
+use Sebdesign\VivaPayments\Requests\Customer;
 
 class Order extends Model
 {
@@ -64,4 +67,29 @@ class Order extends Model
     {
         return $this->belongsTo(Coupon::class, 'coupon_code', 'code');
     }
+
+    public function createVivaCode() {
+        $this->payment_id = Viva::orders()->create(new CreatePaymentOrder(
+            amount: abs($this->total_price * 100),
+            sourceCode: config('services.viva.source_code'),
+            customer: new Customer(
+                email: $this->user->email,
+                fullName: $this->user->name,
+                countryCode: 'GR',
+                requestLang: 'el-GR'
+            ),
+            customerTrns: "Παραγγελία #{$this->id} από το {$this->store->name}",
+            merchantTrns: "order:{$this->id}",
+        ));
+        $this->save();
+    }
+
+    public function getVivaUrl() {
+        $redirectUrl = Viva::orders()->redirectUrl(
+            ref: $this->payment_id,
+            color: 'ef000d'
+        );
+        return $redirectUrl;
+    }
+
 }

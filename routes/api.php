@@ -4,8 +4,13 @@ use App\Mail\TestMail;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    $order = \App\Models\Order::find(8);
+
     return response()->json([
-        'message' => 'Welcome to e-food API !!!'
+        'message' => 'Welcome to e-food API !!!',
+        'total_price' => $order->total_price,
+        'total_price_cents' => $order->total_price * 100,
+        'amount' => abs($order->total_price * 100)
     ]);
 });
 
