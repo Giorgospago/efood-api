@@ -64,7 +64,7 @@ class StoreController extends Controller
         }
 
         $stores = $query->get();
-
+        $stores->each->append(["logo", "cover"]);
         // $stores = $stores->toArray();
         // foreach ($stores as $key => $store) {
         //     $categories = [];
@@ -105,7 +105,7 @@ class StoreController extends Controller
         );
 
         $query->addSelect(DB::raw('distance(stores.latitude, stores.longitude, ' . $lat . ', ' . $lng . ') as distance'));
-        
+
         $query->whereId($id);
         $query->where('active', true);
         $query->whereRaw("JSON_EXTRACT(JSON_EXTRACT(working_hours, '$[" . date('w') . "]'), '$.start') <= TIME_FORMAT(NOW(), '%H:%i')");

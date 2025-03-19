@@ -41,10 +41,10 @@ class ProductsRelationManager extends RelationManager
                             ->preload()
                             ->native(false)
                             ->relationship(
-                                name: 'productCategory', 
+                                name: 'productCategory',
                                 titleAttribute: 'name',
                                 modifyQueryUsing: fn (Builder $query) => $query
-                                    ->whereRelation("store", "user_id", auth()->id()),
+                                    ->where("store_id", $this->getOwnerRecord()->id),
                             ),
                         Forms\Components\Toggle::make("active")
                             ->default(true),
