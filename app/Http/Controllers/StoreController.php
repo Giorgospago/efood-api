@@ -65,6 +65,13 @@ class StoreController extends Controller
 
         $stores = $query->get();
         $stores->each->append(["logo", "cover"]);
+
+        $shippingPriceFixed = config('app.shipping_price.fixed');
+        $shippingPricePerKm = config('app.shipping_price.price_per_km');
+
+        $stores->each(function ($store) use ($shippingPriceFixed, $shippingPricePerKm) {
+            $store->shipping_price = round($shippingPriceFixed + ($shippingPricePerKm * $store->distance), 1);
+        });
         // $stores = $stores->toArray();
         // foreach ($stores as $key => $store) {
         //     $categories = [];
@@ -136,6 +143,16 @@ class StoreController extends Controller
         ]);
 
         $store = $query->first();
+
+        $shippingPriceFixed = config('app.shipping_price.fixed');
+        $shippingPricePerKm = config('app.shipping_price.price_per_km');
+        $store->shipping_price = round($shippingPriceFixed + ($shippingPricePerKm * $store->distance), 1);
+
+        $store->append(["logo", "cover"]);
+
+        foreach ($store->productCategories as $category) {
+            $category->products->each->append(["mainImage"]);
+        }
 
         $response = [
             'success' => true,
