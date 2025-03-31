@@ -33,6 +33,7 @@ class CategoryResource extends Resource
                     ->required()
                     ->translatable(),
                 SpatieMediaLibraryFileUpload::make('icon')
+                    ->disk("s3")
                     ->collection('icon')
             ]);
     }

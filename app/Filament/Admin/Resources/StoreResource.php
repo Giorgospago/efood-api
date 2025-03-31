@@ -76,8 +76,10 @@ class StoreResource extends Resource
                     ->description("Add a logo and a cover photo")
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('logo')
+                            ->disk("s3")
                             ->collection('logo'),
                         SpatieMediaLibraryFileUpload::make('cover')
+                            ->disk("s3")
                             ->collection('cover'),
                     ])
             ]);

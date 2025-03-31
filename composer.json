@@ -13,6 +13,7 @@
         "laravel/framework": "^11.31",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
+        "league/flysystem-aws-s3-v3": "^3.0",
         "matomo/device-detector": "^6.4",
         "outerweb/filament-translatable-fields": "^2.0",
         "sebdesign/laravel-viva-payments": "^6.1",
