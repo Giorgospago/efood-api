@@ -29,7 +29,7 @@ class ProductsRelationManager extends RelationManager
                         Forms\Components\TextInput::make("name")
                             ->required()
                             ->translatable(),
-                        Forms\Components\TextArea::make("description")
+                        Forms\Components\Textarea::make("description")
                             ->translatable(),
                         Forms\Components\TextInput::make("price")
                             ->suffix('€')
