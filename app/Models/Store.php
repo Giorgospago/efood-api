@@ -31,7 +31,10 @@ class Store extends Model implements HasMedia
 
     // protected $appends = ['logo', 'cover'];
 
-    protected $hidden = ['pivot'];
+    protected $hidden = [
+        'pivot',
+        'media'
+    ];
 
     protected $casts = [
         'working_hours' => 'array',
