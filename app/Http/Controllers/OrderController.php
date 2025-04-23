@@ -13,6 +13,7 @@ use Sebdesign\VivaPayments\Facades\Viva;
 
 class OrderController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
@@ -20,9 +21,19 @@ class OrderController extends Controller
     {
         $user = $request->user();
         $orders = $user->orders()
-            ->with(['products'])
+            ->with([
+                'products.product',
+                'store'
+            ])
             ->orderByDesc('created_at')
             ->get();
+
+        foreach ($orders as $order) {
+            foreach ($order->products as $product) {
+                $product->product->append('mainImage');
+            }
+            $order->store->append('logo');
+        }
 
         $response = [
             'success' => true,
@@ -112,7 +123,7 @@ class OrderController extends Controller
         $minPerItem = config('app.delivery_time.minutes_per_item');
         $minPerKm = config('app.delivery_time.minutes_per_km');
         // $minPerDriverOrder = config('app.delivery_time.minutes_per_driver_order');
-        
+
         $storeOrdersCount = $store->orders()
             ->whereIn('status', ['pending', 'processing', 'out_for_delivery'])
             // ->whereId('!=', $order->id)
@@ -120,7 +131,7 @@ class OrderController extends Controller
         $orderProductsCount = $order->products()->count();
         $shippingPriceFixed = config('app.shipping_price.fixed');
         $shippingPricePerKm = config('app.shipping_price.price_per_km');
-        
+
         $order->delivery_time = abs(($minPerStoreOrder * $storeOrdersCount) + ($minPerItem * $orderProductsCount) + ($minPerKm * $distanceInKm));
         $order->shipping_price = round($shippingPriceFixed + ($shippingPricePerKm * $distanceInKm), 2);
 
@@ -140,7 +151,7 @@ class OrderController extends Controller
                 if ($coupon->start_date && $coupon->start_date->isFuture()) {
                     $couponIsValid = false;
                 }
-    
+
                 if ($coupon->end_date && $coupon->end_date->isPast()) {
                     $couponIsValid = false;
                 }
@@ -186,7 +197,13 @@ class OrderController extends Controller
     public function show(Request $request, $id)
     {
         $user = $request->user();
-        $order = $user->orders()->find($id);
+        $order = $user->orders()
+            ->with([
+                'products.product',
+                'store',
+                'address'
+            ])
+            ->find($id);
 
         if (!$order) {
             $response = [
@@ -195,6 +212,11 @@ class OrderController extends Controller
             ];
             return response()->json($response, 404);
         }
+
+        foreach ($order->products as $product) {
+            $product->product->append('mainImage');
+        }
+        $order->store->append('logo');
 
         $response = [
             'success' => true,
