@@ -36,6 +36,8 @@ class Order extends Model
         'shipping_price' => 'float',
         'discount' => 'float',
         'tip' => 'float',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function user()

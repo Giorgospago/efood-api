@@ -11,6 +11,8 @@ class DriverOrderController extends Controller
     public function nearbyOrders(Request $request)
     {
         $driver_commission = config('app.driver_commission.percentage');
+        $minPerStoreOrder = config('app.delivery_time.minutes_per_store_order');
+        $minPerItem = config('app.delivery_time.minutes_per_item');
 
         $lat = $request->coordinates['latitude'];
         $lng = $request->coordinates['longitude'];
@@ -21,7 +23,8 @@ class DriverOrderController extends Controller
             'orders.store_id',
             'orders.address_id',
             'orders.user_id',
-            'orders.payment_method'
+            'orders.payment_method',
+            'orders.created_at',
         ]);
         $query->addSelect(DB::raw('(orders.shipping_price * ' . $driver_commission . ') as driver_commission'));
         $query->addSelect(DB::raw('distance(stores.latitude, stores.longitude, ' . $lat . ', ' . $lng . ') as store_distance'));
@@ -50,13 +53,18 @@ class DriverOrderController extends Controller
                     'name'
                 ]);
             },
-            'store' => function ($query) {
-                $query->select([
+            'store' => function ($sub) {
+                $sub->select([
                     'id',
                     'name',
                     'address',
                     'latitude',
                     'longitude'
+                ]);
+                $sub->withCount([
+                    'orders' => function ($sub2) {
+                        $sub2->where('status', 'processing');
+                    }
                 ]);
             }
         ]);
@@ -70,8 +78,10 @@ class DriverOrderController extends Controller
             ]);
         }
 
-        $orders->each(function ($order) {
+        $orders->each(function ($order) use ($minPerStoreOrder, $minPerItem) {
             $order->store->append('cover', 'logo');
+            $preparation_time = ($order->store->orders_count * $minPerStoreOrder) + ($order->products->sum('quantity') * $minPerItem);
+            $order->preparation_at = $order->created_at->addMinutes($preparation_time);
         });
 
         return response()->json([

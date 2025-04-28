@@ -88,6 +88,13 @@ class OrderController extends Controller
         $order->shipping_method = $request->shipping_method;
         $order->note = $request->note;
         $order->tip = $request->tip;
+        $order->delivery_time = 0;
+        $order->shipping_price = 0;
+
+        if ($order->payment_method === "cod") {
+            $order->status = "processing";
+        }
+
         $order->save();
 
         /**
@@ -116,25 +123,27 @@ class OrderController extends Controller
         }
         $order->save();
 
-        /**
-         * Calculate delivery_time and shipping_price
-         */
-        $minPerStoreOrder = config('app.delivery_time.minutes_per_store_order');
-        $minPerItem = config('app.delivery_time.minutes_per_item');
-        $minPerKm = config('app.delivery_time.minutes_per_km');
-        // $minPerDriverOrder = config('app.delivery_time.minutes_per_driver_order');
+        if ($order->shipping_method === 'delivery') {
+            /**
+             * Calculate delivery_time and shipping_price
+             */
+            $minPerStoreOrder = config('app.delivery_time.minutes_per_store_order');
+            $minPerItem = config('app.delivery_time.minutes_per_item');
+            $minPerKm = config('app.delivery_time.minutes_per_km');
+            // $minPerDriverOrder = config('app.delivery_time.minutes_per_driver_order');
 
-        $storeOrdersCount = $store->orders()
-            ->whereIn('status', ['pending', 'processing', 'out_for_delivery'])
-            // ->whereId('!=', $order->id)
-            ->count();
-        $orderProductsCount = $order->products()->count();
-        $shippingPriceFixed = config('app.shipping_price.fixed');
-        $shippingPricePerKm = config('app.shipping_price.price_per_km');
+            $storeOrdersCount = $store->orders()
+                ->whereIn('status', ['processing'])
+                // ->whereId('!=', $order->id)
+                ->count();
+            $orderProductsCount = $order->products()->count();
+            $shippingPriceFixed = config('app.shipping_price.fixed');
+            $shippingPricePerKm = config('app.shipping_price.price_per_km');
 
-        $order->delivery_time = abs(($minPerStoreOrder * $storeOrdersCount) + ($minPerItem * $orderProductsCount) + ($minPerKm * $distanceInKm));
-        $order->shipping_price = round($shippingPriceFixed + ($shippingPricePerKm * $distanceInKm), 2);
-
+            $order->delivery_time = abs(($minPerStoreOrder * $storeOrdersCount) + ($minPerItem * $orderProductsCount) + ($minPerKm * $distanceInKm));
+            $order->shipping_price = round($shippingPriceFixed + ($shippingPricePerKm * $distanceInKm), 2);
+        }
+        
         /**
          * Check Coupon discount
          */
