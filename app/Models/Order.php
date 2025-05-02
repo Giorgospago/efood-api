@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enum\OrderStatus;
 use Illuminate\Database\Eloquent\Model;
 use Sebdesign\VivaPayments\Facades\Viva;
 use Sebdesign\VivaPayments\Requests\CreatePaymentOrder;
