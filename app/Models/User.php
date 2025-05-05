@@ -86,5 +86,10 @@ class User extends Authenticatable implements FilamentUser, MustVerifyEmail
     {
         return $this->hasMany(Store::class);
     }
+
+    public function sockets(): HasMany
+    {
+        return $this->hasMany(UserSocket::class);
+    }
     
 }

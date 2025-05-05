@@ -40,3 +40,4 @@ Route::get("/roles", function () {
 
 Route::prefix('driver')->name('driver')->group(base_path('routes/driver.php'));
 Route::prefix('client')->name('client')->group(base_path('routes/client.php'));
+Route::prefix('sockets')->name('sockets')->group(base_path('routes/sockets.php'));
