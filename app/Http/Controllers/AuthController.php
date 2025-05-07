@@ -115,6 +115,60 @@ class AuthController extends Controller
         return response()->json($response);
     }
 
+    public function update(Request $request)
+    {
+        $fields = $request->validate([
+            'name' => 'required|string',
+            'phone' => 'nullable|string|min:10'
+        ]);
+
+        $user = $request->user();
+
+        $user->name = $fields['name'];
+        $user->phone = $fields['phone'] ?? null;
+        $user->save();
+
+        $response = [
+            'success' => true,
+            'message' => 'User updated',
+            'data' => [
+                'user' => $user,
+            ]
+        ];
+
+        return response()->json($response);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $fields = $request->validate([
+            'current_password' => 'required|string|min:6',
+            'password' => 'required|string|min:6'
+        ]);
+
+        $user = $request->user();
+
+        if (!Hash::check($fields['current_password'], $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Current password is wrong'
+            ], 401);
+        }
+
+        $user->password = bcrypt($fields['password']);
+        $user->save();
+
+        $response = [
+            'success' => true,
+            'message' => 'User password changed',
+            'data' => [
+                'user' => $user,
+            ]
+        ];
+
+        return response()->json($response);
+    }
+
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
