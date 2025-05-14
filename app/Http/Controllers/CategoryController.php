@@ -11,9 +11,9 @@ class CategoryController extends Controller
     public function index()
     {
         $categories = Category::query()
-//            ->limit(10)
+            ->limit(10)
             ->select(['id', 'name'])
-            ->orderBy('name')
+//            ->orderBy('name')
             ->get();
         $categories->each->append("icon");
 

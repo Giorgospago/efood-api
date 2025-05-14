@@ -247,16 +247,6 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make("created_at")
                     ->dateTime()
                     ->since(),
-//                SelectColumn::make('status')
-//                    ->extraAttributes(function ($state) {
-//                        $bgColor = OrderStatus::from($state)->color();
-//                        return ['class' => "bg-{$bgColor}-500"];
-//                    })
-//                    ->options(
-//                        collect(OrderStatus::cases())
-//                            ->mapWithKeys(fn ($enum) => [$enum->value => $enum->name])
-//                            ->toArray()
-//                    ),
                 Tables\Columns\TextColumn::make("status")
                     ->badge()
                     ->color(function ($state) {

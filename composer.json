@@ -10,6 +10,7 @@
         "arbermustafa/filament-locationpickr-field": "^2.0.0",
         "filament/filament": "^3.2",
         "filament/spatie-laravel-media-library-plugin": "^3.2",
+        "filament/widgets": "3.2.141",
         "laravel/framework": "^11.31",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",

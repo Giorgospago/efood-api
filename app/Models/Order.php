@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enum\OrderStatus;
 use Illuminate\Database\Eloquent\Model;
 use Sebdesign\VivaPayments\Facades\Viva;
 use Sebdesign\VivaPayments\Requests\CreatePaymentOrder;
@@ -40,6 +39,8 @@ class Order extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    protected $guarded = [];
 
     public function user()
     {
