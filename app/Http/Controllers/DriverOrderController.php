@@ -114,15 +114,6 @@ class DriverOrderController extends Controller
         $order->driver_id = $request->user()->id;
         $order->save();
 
-        $socketIds = $order->user->sockets()->pluck('socket_id')->toArray();
-        Http::socket()->post('send-to-client', [
-            'socket_ids' => $socketIds,
-            'channel' => 'order-update-' . $order->id,
-            'data' => [
-                'order' => $order
-            ]
-        ]);
-    
         return response()->json([
             'success' => true,
             'message' => 'Order taken successfully'
@@ -233,6 +224,15 @@ class DriverOrderController extends Controller
         $order->status = "out_for_delivery";
         $order->save();
 
+        $socketIds = $order->user->sockets()->pluck('socket_id')->toArray();
+        \Illuminate\Support\Facades\Http::socket()->post('send-to-client', [
+            'socket_ids' => $socketIds,
+            'channel' => 'order-update-' . $order->id,
+            'data' => [
+                'order' => $order
+            ]
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Order updated successfully'
@@ -330,6 +330,15 @@ class DriverOrderController extends Controller
         $order->shipping_status = "completed";
         $order->status = "completed";
         $order->save();
+
+        $socketIds = $order->user->sockets()->pluck('socket_id')->toArray();
+        \Illuminate\Support\Facades\Http::socket()->post('send-to-client', [
+            'socket_ids' => $socketIds,
+            'channel' => 'order-update-' . $order->id,
+            'data' => [
+                'order' => $order
+            ]
+        ]);
 
         return response()->json([
             'success' => true,

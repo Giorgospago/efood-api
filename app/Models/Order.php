@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Enum\OrderStatus;
+use App\Notifications\OrderCreated;
+use App\Notifications\OrderStatusUpdated;
 use Illuminate\Database\Eloquent\Model;
 use Sebdesign\VivaPayments\Facades\Viva;
 use Sebdesign\VivaPayments\Requests\CreatePaymentOrder;
@@ -41,6 +44,28 @@ class Order extends Model
     ];
 
     protected $guarded = [];
+
+    protected static function booted()
+    {
+        static::updating(function (Order $order) {
+            if ($order->isDirty('status')) {
+                $socketIds = $order->user->sockets()->pluck('socket_id')->toArray();
+                \Illuminate\Support\Facades\Http::socket()->post('send-to-client', [
+                    'socket_ids' => $socketIds,
+                    'channel' => 'order-update-' . $order->id,
+                    'data' => [
+                        'order' => $order
+                    ]
+                ]);
+
+//                $order->user->notify(new OrderStatusUpdated($order));
+            }
+        });
+
+        static::created(function (Order $order) {
+            $order->store->user->notify(new OrderCreated($order));
+        });
+    }
 
     public function user()
     {

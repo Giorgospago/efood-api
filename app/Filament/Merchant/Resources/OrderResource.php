@@ -196,24 +196,16 @@ class OrderResource extends Resource
                 Action::make('status')
                     ->color("info")
                     ->label("Start processing")
-                    ->visible(fn (Model $record): bool => $record->status === OrderStatus::pending->value)
+                    ->visible(fn (Model $record): bool => $record->status === OrderStatus::pending->value || $record->status === OrderStatus::cancelled->value)
                     ->icon('heroicon-s-play')
                     ->action(function (Model $record) {
                         $record->status = OrderStatus::processing->value;
                         $record->save();
                     }),
                 Action::make('status')
-                    ->color("success")
-                    ->label("Out for delivery")
-                    ->visible(fn (Model $record): bool => $record->status === OrderStatus::processing->value)
-                    ->icon('heroicon-s-arrow-up-right')
-                    ->action(function (Model $record) {
-                        $record->status = OrderStatus::outForDelivery->value;
-                        $record->save();
-                    }),
-                Action::make('status')
                     ->color("danger")
                     ->label("Cancel order")
+                    ->hidden(fn (Model $record): bool => $record->status === OrderStatus::outForDelivery->value)
                     ->icon('heroicon-o-x-mark')
                     ->action(function (Model $record) {
                         $record->status = OrderStatus::cancelled->value;
@@ -236,6 +228,7 @@ class OrderResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort("created_at", "desc")
             ->columns([
                 Tables\Columns\TextColumn::make("id")
                     ->searchable()
