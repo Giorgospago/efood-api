@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use DB;
+use Http;
 use Illuminate\Http\Request;
 use App\Models\Order;
 
@@ -113,6 +114,15 @@ class DriverOrderController extends Controller
         $order->driver_id = $request->user()->id;
         $order->save();
 
+        $socketIds = $order->user->sockets()->pluck('socket_id')->toArray();
+        Http::socket()->post('send-to-client', [
+            'socket_ids' => $socketIds,
+            'channel' => 'order-update-' . $order->id,
+            'data' => [
+                'order' => $order
+            ]
+        ]);
+    
         return response()->json([
             'success' => true,
             'message' => 'Order taken successfully'

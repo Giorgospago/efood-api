@@ -25,6 +25,22 @@ Route::get('/test-email', function () {
         'message' => 'Email sent successfully'
     ]);
 });
+Route::get('/test', function () {
+
+    $order = \App\Models\Order::find(40);
+    $socketIds = $order->user->sockets()->pluck('socket_id')->toArray();
+    Http::socket()->post('send-to-client', [
+        'socket_ids' => $socketIds,
+        'channel' => 'order-update-' . $order->id,
+        'data' => [
+            'order' => $order
+        ]
+    ]);
+
+    return response()->json([
+        'message' => 'Socket sent successfully'
+    ]);
+});
 
 Route::get("/roles", function () {
     $roles = \App\Models\Role::all();
