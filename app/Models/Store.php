@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Facades\Cache;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -44,6 +45,19 @@ class Store extends Model implements HasMedia
     protected $appends = [
         "location"
     ];
+
+    protected static function booted()
+    {
+        static::created(function (Store $store) {
+            Cache::forget('stores');
+        });
+        static::updated(function (Store $store) {
+            Cache::forget('stores');
+        });
+        static::deleted(function (Store $store) {
+            Cache::forget('stores');
+        });
+    }
 
     public function categories()
     {
@@ -85,11 +99,11 @@ class Store extends Model implements HasMedia
     public function location(): Attribute
     {
         return Attribute::make(
-            get: fn ($value, $attributes) => json_encode([
-                'lat' => (float) $attributes['latitude'],
-                'lng' => (float) $attributes['longitude'],
+            get: fn($value, $attributes) => json_encode([
+                'lat' => (float)$attributes['latitude'],
+                'lng' => (float)$attributes['longitude'],
             ]),
-            set: fn ($value) => [
+            set: fn($value) => [
                 'latitude' => $value['lat'],
                 'longitude' => $value['lng'],
             ],
