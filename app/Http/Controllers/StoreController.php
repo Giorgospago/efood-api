@@ -13,8 +13,9 @@ class StoreController extends Controller
     {
         $lat = $request->coordinates['latitude'];
         $lng = $request->coordinates['longitude'];
+        $locale = app()->getLocale();
 
-        $cached = Cache::rememberForever("stores", function() {
+        $cached = Cache::rememberForever("stores.$locale", function() {
             $stores = Store::query()
                 ->with([
                     'categories' => function ($subQuery) {
@@ -39,14 +40,18 @@ class StoreController extends Controller
             return $stores->toArray();
         });
 
+        $shippingPriceFixed = config('app.shipping_price.fixed');
+        $shippingPricePerKm = config('app.shipping_price.price_per_km');
+
         $stores = collect($cached)
-            ->map(function ($store) use ($lat, $lng) {
+            ->map(function ($store) use ($lat, $lng, $shippingPriceFixed, $shippingPricePerKm) {
                 $store["distance"] = $this->distance(
                     $store['latitude'],
                     $store['longitude'],
                     $lat,
                     $lng
                 );
+                $store["shipping_price"] = round($shippingPriceFixed + ($shippingPricePerKm * ($store["distance"] / 1000)), 1);
                 return $store;
             })
             ->filter(function ($store) use ($lat, $lng, $request) {
@@ -100,13 +105,6 @@ class StoreController extends Controller
 //                $query->orderBy('distance');
 //                break;
         }
-
-        $shippingPriceFixed = config('app.shipping_price.fixed');
-        $shippingPricePerKm = config('app.shipping_price.price_per_km');
-
-        $stores->each(function ($store) use ($shippingPriceFixed, $shippingPricePerKm) {
-            $store["shipping_price"] = round($shippingPriceFixed + ($shippingPricePerKm * $store["distance"]), 1);
-        });
 
         $response = [
             'success' => true,

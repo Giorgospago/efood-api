@@ -11,7 +11,8 @@ class CategoryController extends Controller
 
     public function index()
     {
-        $categories = Cache::rememberForever('categories', function () {
+        $locale = app()->getLocale();
+        $categories = Cache::rememberForever("categories.$locale", function () {
             $cat = Category::query()
                 ->select(['id', 'name'])
                 ->get();
